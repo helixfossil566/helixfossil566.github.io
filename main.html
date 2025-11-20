@@ -1,22 +1,194 @@
-<!DOCTYPE html>
-<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
-<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
-<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
-<html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title></title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="">
-    </head>
-    <body>
-        <!--[if lt IE 7]>
-            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
-        <![endif]-->
-        
-        <script src="" async defer></script>
-    </body>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Horizontal Scrolling Website</title>
+  <style>
+    /* Reset & base */
+    :root{
+      --gap: 2rem;
+      --nav-height: 64px;
+      --bg: #0f172a;
+      --muted: rgba(255,255,255,0.08);
+      --glass: rgba(255,255,255,0.06);
+      --accent: linear-gradient(135deg,#7c3aed,#06b6d4);
+      --text: #e6eef8;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(124,58,237,0.06), transparent), var(--bg);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    /* Top nav */
+    .topbar{
+      position:fixed;left:0;right:0;top:12px;height:var(--nav-height);display:flex;align-items:center;gap:1rem;padding:0 1rem;z-index:40;
+      pointer-events:auto;
+    }
+    .brand{display:flex;align-items:center;gap:.75rem;font-weight:700}
+    .brand .logo{width:44px;height:44px;border-radius:10px;background:var(--accent);box-shadow:0 6px 18px rgba(2,6,23,0.6);display:flex;align-items:center;justify-content:center}
+    nav{margin-left:auto;display:flex;gap:.5rem}
+    nav a{color:var(--text);text-decoration:none;padding:.5rem .75rem;border-radius:10px;font-size:0.95rem;opacity:.9}
+    nav a:focus{outline:3px solid rgba(6,182,212,0.18);outline-offset:3px}
+
+    /* Horizontal scroller container */
+    .scroller-wrap{position:relative;margin-top:calc(var(--nav-height) + 12px);height:calc(100vh - (var(--nav-height) + 12px));overflow:hidden}
+    .scroller{
+      height:100%;display:flex;gap:var(--gap);align-items:stretch;overflow-x:auto;overflow-y:hidden;
+      scroll-snap-type:x mandatory;padding:var(--gap);scroll-behavior:smooth; -webkit-overflow-scrolling:touch;
+    }
+
+    /* Panels (sections) */
+    .panel{
+      min-width:80vw; /* change to 100vw for full-bleed pages */
+      height:100%;flex:0 0 auto;border-radius:14px;padding:2.5rem;display:flex;flex-direction:column;justify-content:center;gap:1rem;scroll-snap-align:center;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));backdrop-filter: blur(6px);border:1px solid var(--muted);
+    }
+
+    .panel h1{margin:0;font-size:clamp(2rem,4vw,3rem);letter-spacing:-0.02em}
+    .panel p{margin:0;font-size:clamp(1rem,1.6vw,1.125rem);color:rgba(230,238,248,0.85);max-width:65ch}
+
+    /* Sample accent area */
+    .hero-visual{margin-top:1.25rem;width:100%;height:40vh;border-radius:10px;background:linear-gradient(90deg, rgba(124,58,237,0.18), rgba(6,182,212,0.12));display:flex;align-items:center;justify-content:center;font-weight:600}
+
+    /* Scrollbar (modern browsers) */
+    .scroller::-webkit-scrollbar{height:12px}
+    .scroller::-webkit-scrollbar-thumb{background:linear-gradient(90deg,#7c3aed,#06b6d4);border-radius:999px}
+    .scroller::-webkit-scrollbar-track{background:transparent}
+
+    /* Snap hint / indicator */
+    .pips{position:fixed;right:14px;bottom:20px;display:flex;flex-direction:column;gap:.5rem;z-index:50}
+    .pip{width:10px;height:10px;border-radius:999px;background:rgba(255,255,255,0.12);box-shadow:0 2px 6px rgba(2,6,23,0.5)}
+    .pip.active{background:linear-gradient(180deg,#06b6d4,#7c3aed);transform:scale(1.25)}
+
+    /* Responsive tweaks */
+    @media (min-width:1300px){
+      .panel{min-width:1000px}
+    }
+    @media (max-width:600px){
+      .panel{min-width:100vw;padding:1.25rem}
+      .topbar{padding:0 .75rem}
+    }
+
+    /* Accessibility: focus visible */
+    a:focus, button:focus{outline:3px solid rgba(124,58,237,0.18);outline-offset:3px}
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to content</a>
+  <header class="topbar" role="banner">
+    <div class="brand">
+      <div class="logo" aria-hidden>HB</div>
+      <div>
+        <div style="font-size:0.95rem">Horizontal</div>
+        <div style="font-size:0.75rem;opacity:.75;margin-top:-2px">Scrolling demo</div>
+      </div>
+    </div>
+    <nav aria-label="Primary navigation">
+      <a href="#panel-1">Home</a>
+      <a href="#panel-2">Work</a>
+      <a href="#panel-3">About</a>
+      <a href="#panel-4">Contact</a>
+    </nav>
+  </header>
+
+  <main id="main" class="scroller-wrap" role="main">
+    <div class="scroller" id="scroller" tabindex="0" aria-label="Horizontal scroller with panels">
+
+      <section id="panel-1" class="panel" aria-labelledby="p1">
+        <h1 id="p1">Welcome — horizontal layout</h1>
+        <p>Modern, horizontally scrolling website layout using CSS scroll snapping. Use trackpad, shift+wheel, or the arrows to move between panels. Each panel is sized to the viewport for a predictable rhythm.</p>
+        <div class="hero-visual">Hero visual / preview card</div>
+      </section>
+
+      <section id="panel-2" class="panel" aria-labelledby="p2">
+        <h1 id="p2">Our Work</h1>
+        <p>Showcase projects side-by-side. Resize the window — the scroller keeps panels aligned and uses smooth native scrolling.</p>
+        <div style="display:flex;gap:12px;margin-top:1rem">
+          <div style="flex:1;padding:1rem;border-radius:8px;background:var(--glass);border:1px solid rgba(255,255,255,0.03)">Project A</div>
+          <div style="flex:1;padding:1rem;border-radius:8px;background:var(--glass);border:1px solid rgba(255,255,255,0.03)">Project B</div>
+        </div>
+      </section>
+
+      <section id="panel-3" class="panel" aria-labelledby="p3">
+        <h1 id="p3">About</h1>
+        <p>Tell a story left-to-right instead of top-to-bottom. Horizontal layouts are great for portfolios, product tours, timelines, and magazine style presentations.</p>
+      </section>
+
+      <section id="panel-4" class="panel" aria-labelledby="p4">
+        <h1 id="p4">Contact</h1>
+        <p>CTA, form, or contact details can live here. The layout keeps everything side-by-side and readable.</p>
+      </section>
+
+    </div>
+
+    <div class="pips" aria-hidden id="pips"></div>
+  </main>
+
+  <script>
+    // Small JS helpers: wheel-to-horizontal and keyboard arrows, plus active pip indicator.
+    (function(){
+      const scroller = document.getElementById('scroller');
+      const panels = Array.from(scroller.querySelectorAll('.panel'));
+      const pipsWrap = document.getElementById('pips');
+
+      // Create pips
+      panels.forEach((_,i)=>{
+        const el = document.createElement('div'); el.className='pip'; pipsWrap.appendChild(el);
+      });
+      const pips = Array.from(pipsWrap.children);
+
+      function updateActive(){
+        const center = scroller.scrollLeft + scroller.clientWidth/2;
+        let activeIndex = 0;
+        panels.forEach((p, i)=>{
+          const rectLeft = p.offsetLeft;
+          const rectCenter = rectLeft + p.offsetWidth/2;
+          if(Math.abs(rectCenter - center) < Math.abs((panels[activeIndex].offsetLeft + panels[activeIndex].offsetWidth/2) - center)) activeIndex = i;
+        });
+        pips.forEach((pip, i)=> pip.classList.toggle('active', i===activeIndex));
+      }
+
+      updateActive();
+      scroller.addEventListener('scroll', throttle(updateActive, 80));
+
+      // Wheel -> horizontal scroll (prevents accidental vertical scroll when inside this region)
+      scroller.addEventListener('wheel', function(e){
+        // If user uses shift they expect horizontal already; let browser handle it.
+        if(e.shiftKey) return;
+        // Only intercept vertical wheel (deltaY)
+        if(Math.abs(e.deltaY) > Math.abs(e.deltaX)){
+          e.preventDefault();
+          scroller.scrollLeft += e.deltaY;
+        }
+      }, {passive:false});
+
+      // Arrow keys
+      scroller.addEventListener('keydown', function(e){
+        if(e.key === 'ArrowRight') { e.preventDefault(); scroller.scrollBy({left: scroller.clientWidth*0.6, behavior:'smooth'}); }
+        if(e.key === 'ArrowLeft') { e.preventDefault(); scroller.scrollBy({left: -scroller.clientWidth*0.6, behavior:'smooth'}); }
+      });
+
+      // Make scroller focusable for keyboard
+      scroller.setAttribute('tabindex', '0');
+
+      // tiny throttle utility
+      function throttle(fn, wait){ let t=0; return (...args)=>{ const now = Date.now(); if(now - t > wait){ t=now; fn(...args); } } }
+
+      // Clicking nav anchors focuses & scrolls naturally
+      document.querySelectorAll('nav a').forEach(a=>{
+        a.addEventListener('click', e=>{
+          // After browser scroll, put focus for keyboard users
+          setTimeout(()=>{ const target = document.querySelector(a.getAttribute('href')); if(target) target.focus(); }, 500);
+        });
+      });
+
+    })();
+  </script>
+</body>
 </html>
