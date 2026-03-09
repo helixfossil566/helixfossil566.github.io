@@ -109,20 +109,20 @@ function init() {
   }, 10);
 
   function left() {
-    let i = 10;
+    let i = 30;
     let int = setInterval(() => {
       char.xOffset -= i;
-      if (char.rotation - i / 2 > -135) char.rotation -= i / 2;
+      if (char.rotation - i / 2 > -110) char.rotation -= i / 2;
       i--;
       if (i === 0) clearInterval(int);
     }, 40);
   }
 
   function right() {
-    let i = 10;
+    let i = 30;
     let int = setInterval(() => {
       char.xOffset += i;
-      if (char.rotation + i / 2 < -45) char.rotation += i / 2;
+      if (char.rotation + i / 2 < -70) char.rotation += i / 2;
       i--;
       if (i === 0) clearInterval(int);
     }, 40);
